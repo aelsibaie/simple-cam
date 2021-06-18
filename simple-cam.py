@@ -25,7 +25,7 @@ img_root = "/home/pi/pictures"
 # check for the existence of this file. When it's deleted stop
 # the capture loop. This is how the movie generation process stops
 # the image generation process
-semaphore_fn = "/home/pi/running.txt"
+semaphore_fn = "/home/pi/simple-cam/running.txt"
 
 
 def email_error_report(error_str):
