@@ -6,7 +6,7 @@ import shutil
 import socket
 import logging
 
-logging.basicConfig(filename='simple-cam.log',level=logging.DEBUG)
+logging.basicConfig(filename='simple-cam.log', level=logging.DEBUG)
 
 RESOLUTION = "1280x960"
 
@@ -39,11 +39,10 @@ if __name__ == "__main__":
     logging.info("starting simple-cam.py at " + str(datetime.datetime.now()))
 
     total, used, free = shutil.disk_usage("/")
-
+    freep = free/total
     logging.debug("Total: %d GiB" % (total // (2**30)))
     logging.debug("Used: %d GiB" % (used // (2**30)))
     logging.debug("Free: %d GiB" % (free // (2**30)))
-    freep = free/total
 
     if(freep < (HDD_SPACE_THRESHOLD / 100)):
         error_str = str(round((freep*100), 2)) + "% remaining hard drive space too low on " + socket.gethostname()
@@ -68,7 +67,6 @@ if __name__ == "__main__":
     # a cleaner way is to trap a "kill -15" signal or semaphore...
     error_message = "No such file or directory"
     while os.path.exists(semaphore_fn): 
-        #sys.stdout.flush()
         remote_path = os.path.join(dest_path, "img_{:05}.jpg".format(imcount))
         logging.info("sending remoteshoot at " + str(datetime.datetime.now()))
         completed_process = subprocess.run(["fswebcam", "-r", RESOLUTION, "--no-banner", remote_path], capture_output=True)
