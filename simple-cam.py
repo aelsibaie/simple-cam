@@ -6,13 +6,10 @@ import sys
 import shutil
 import socket
 
-#import gmail
-#gmail.send_message(gmail.service, "amir.elsibaie@gmail.com", "ErrorSubj", "ErrorBody")
-
 RESOLUTION = "1280x960"
 
 # warn the user if HDD space falls below this % (free/total)
-HDD_SPACE_THRESHOLD = 95
+HDD_SPACE_THRESHOLD = 5
 
 # interval between photos in seconds
 INTERVAL = 5
@@ -32,11 +29,14 @@ def email_error_report(error_str):
     print("CRITICAL ERROR, EXITING...")
     print(error_str)
     print("emailing report...")
+    # wait to import because it takes a long time and is only needed for errors
     import gmail
     gmail.send_message(gmail.service, "amir.elsibaie@gmail.com", "simple-cam.py Critical Error", error_str)
     exit()
 
 if __name__ == "__main__":
+    print("starting simple-cam.py at " + str(datetime.datetime.now()))
+
     total, used, free = shutil.disk_usage("/")
 
     print("Total: %d GiB" % (total // (2**30)))
@@ -65,17 +65,16 @@ if __name__ == "__main__":
     imcount = 0
     # run forever and wait to be killed by cronjob.
     # a cleaner way is to trap a "kill -15" signal or semaphore...
+    error_message = "No such file or directory"
     while os.path.exists(semaphore_fn): 
         sys.stdout.flush()
         remote_path = os.path.join(dest_path, "img_{:05}.jpg".format(imcount))
         print("sending remoteshoot at " + str(datetime.datetime.now()))
         completed_process = subprocess.run(["fswebcam", "-r", RESOLUTION, "--no-banner", remote_path], capture_output=True)
-        print(completed_process)
-        if completed_process.returncode != 0:
-            print("bad news bears")
-            exit()
+        if (completed_process.returncode != 0) or (error_message in str(completed_process.stderr)):
+            email_error_report(str(completed_process))
         imcount +=1
-        print("sleeping " + str(INTERVAL) + " seconds starting at: " + str(datetime.datetime.now()))
+        print("remoteshoot success. sleeping " + str(INTERVAL) + " seconds starting at: " + str(datetime.datetime.now()))
         time.sleep(INTERVAL)
 
     # ok here we are done with the loop. Turn off the backlight.
