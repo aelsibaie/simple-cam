@@ -8,13 +8,14 @@ import logging
 
 logging.basicConfig(filename='simple-cam.log', level=logging.DEBUG)
 
-RESOLUTION = "1280x960"
+RESOLUTION = "1920x1080"
+SCALE = "960x540"
 
 # warn the user if HDD space falls below this % (free/total)
 HDD_SPACE_THRESHOLD = 5
 
 # interval between photos in seconds
-INTERVAL = 5
+INTERVAL = 1*60
 
 # path to the root of directory to store jpgs for timelapse processing.
 # a subdirectory is created with the current date and images are moved there
@@ -28,6 +29,7 @@ semaphore_fn = "/home/pi/running.txt"
 
 
 def email_error_report(error_str):
+    os.remove(semaphore_fn)
     logging.critical(error_str)
     logging.info("emailing report...")
     # wait to import because it takes a long time and is only needed for errors
@@ -69,7 +71,8 @@ if __name__ == "__main__":
     while os.path.exists(semaphore_fn):
         remote_path = os.path.join(dest_path, "img_{:05}.jpg".format(imcount))
         logging.info("sending remoteshoot at " + str(datetime.datetime.now()))
-        completed_process = subprocess.run(["fswebcam", "-r", RESOLUTION, "--no-banner", remote_path], capture_output=True)
+        completed_process = subprocess.run(["fswebcam", "-r", RESOLUTION, "--no-banner", "--set", "brightness=50%", "--scale", SCALE, remote_path], capture_output=True)
+        logging.debug(str(completed_process))
         if (completed_process.returncode != 0) or (error_message in str(completed_process.stderr)):
             email_error_report(str(completed_process))
         imcount += 1
