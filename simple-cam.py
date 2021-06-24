@@ -9,6 +9,7 @@ import logging
 logging.basicConfig(filename='simple-cam.log', level=logging.DEBUG)
 
 RESOLUTION = "1920x1080"
+SCALE_TOGGLE = False
 SCALE = "960x540"
 
 # warn the user if HDD space falls below this % (free/total)
@@ -71,7 +72,10 @@ if __name__ == "__main__":
     while os.path.exists(semaphore_fn):
         remote_path = os.path.join(dest_path, "img_{:05}.jpg".format(imcount))
         logging.info("sending remoteshoot at " + str(datetime.datetime.now()))
-        completed_process = subprocess.run(["fswebcam", "-r", RESOLUTION, "--no-banner", "--set", "brightness=50%", "--scale", SCALE, remote_path], capture_output=True)
+        if SCALE_TOGGLE == True:
+            completed_process = subprocess.run(["fswebcam", "-r", RESOLUTION, "--no-banner", "--set", "brightness=50%", "--scale", SCALE, remote_path], capture_output=True)
+        else:
+            completed_process = subprocess.run(["fswebcam", "-r", RESOLUTION, "--no-banner", "--set", "brightness=50%", remote_path], capture_output=True)
         logging.debug(str(completed_process))
         if (completed_process.returncode != 0) or (error_message in str(completed_process.stderr)):
             email_error_report(str(completed_process))

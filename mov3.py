@@ -18,7 +18,7 @@ def all_subdirs_of(b='.'):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        srcfolder = sys.argv[1]
+        srcfolder = str(sys.argv[1]).rstrip("/")
     else:
         all_subdirs = all_subdirs_of(input_dir)
         srcfolder = max((os.path.getmtime(f), f) for f in all_subdirs)[1]
