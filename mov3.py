@@ -45,6 +45,9 @@ if __name__ == "__main__":
 
     # disable audio output
     ffcall.append('-an')
+    
+    ffcall.append('-vf')
+    ffcall.append('format=yuv420p')
 
     # output file
     vidfile = os.path.join(output_dir, froot + '.mp4')
