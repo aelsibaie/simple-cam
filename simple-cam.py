@@ -92,6 +92,42 @@ if __name__ == "__main__":
 
     # wait for last download to finish
     time.sleep(10)
+    
+    
+    logging.info("starting daily report at " + str(datetime.datetime.now()))
+    ## start daily report section
+    my_list = sorted(os.listdir(dest_path))
+    SPLIT = 20
+    indexes = []
+    for i in range(SPLIT - 1):
+        indexes.append(int((len(my_list) / 20) * (i + 1)))
+
+    logging.info("making gif at " + str(datetime.datetime.now()))    
+    from PIL import Image, ImageDraw
+    frames = []
+    for index in indexes:
+        myImage = Image.open(os.path.join(dest_path, my_list[index])).resize((320,180))
+        myDrawing = ImageDraw.Draw(myImage)
+        myDrawing.text((28, 36), my_list[index][4:-4], fill=(255, 0, 0))
+
+        frames.append(myImage)
+
+    frames[0].save("daily_summary.gif", format="GIF", append_images=frames, save_all=True, duration=5000/(SPLIT-1), loop=0, )
+    
+    logging.info("emailing summary at " + str(datetime.datetime.now()))    
+    import gmail
+    today = datetime.date.today()
+    subj = "simple-cam.py Daily Report - {:%d, %b %Y}".format(today)
+
+    body = ""
+    body += "Remaining hard drive space: " + str(round(freep*100, 2)) + "%\n"
+    body += "Minimum required hard drive space: " + str(HDD_SPACE_THRESHOLD) + "%\n\n"
+    body = body + ("Total: %d GiB\n" % (total // (2**30)))
+    body = body + ("Used: %d GiB\n" % (used // (2**30)))
+    body = body + ("Free: %d GiB" % (free // (2**30)))
+    
+    gmail.send_message(gmail.service, "amir.elsibaie@gmail.com", subj, body, attachments=["/home/pi/simple-cam/daily_summary.gif"])
+
 
     logging.info("job finished at " + str(datetime.datetime.now()))
 
