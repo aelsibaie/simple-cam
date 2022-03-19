@@ -20,7 +20,7 @@ HUE = "hue=50%"
 HDD_SPACE_THRESHOLD = 5
 
 # interval between photos in seconds
-INTERVAL = 1*60
+INTERVAL = 2*60
 
 # path to the root of directory to store jpgs for timelapse processing.
 # a subdirectory is created with the current date and images are moved there
